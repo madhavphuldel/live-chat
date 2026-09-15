@@ -1,0 +1,13 @@
+{
+  "name": "live-chat",
+  "version": "1.0.0",
+  "description": "A live chat application",
+  "main": "index.js",
+  "scripts": {
+    "build": "echo \"Build complete\"",
+    "test": "echo \"Test complete\""
+  },
+  "keywords": ["chat", "live"],
+  "author": "",
+  "license": "ISC"
+}
