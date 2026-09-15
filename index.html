@@ -1,0 +1,2621 @@
+<!DOCTYPE html>
+<html lang="ne">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Live Chat System</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+  
+  body {
+    height: 100vh;
+    overflow: hidden;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+  }
+  
+  /* ============ AUTH SCREEN ============ */
+  .auth-screen {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    z-index: 100;
+  }
+  
+  .auth-box {
+    background: #fff;
+    padding: 35px 30px;
+    border-radius: 20px;
+    width: 420px;
+    max-width: 100%;
+    max-height: 95vh;
+    overflow-y: auto;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+  }
+  
+  .auth-box h2 { text-align: center; color: #333; margin-bottom: 6px; font-size: 24px; }
+  .auth-box .sub { text-align: center; color: #666; font-size: 13px; margin-bottom: 22px; }
+  
+  .auth-tabs {
+    display: flex;
+    background: #f0f2f5;
+    border-radius: 12px;
+    padding: 4px;
+    margin-bottom: 22px;
+  }
+  
+  .auth-tab {
+    flex: 1;
+    padding: 10px;
+    text-align: center;
+    cursor: pointer;
+    border-radius: 9px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #666;
+    transition: 0.2s;
+  }
+  
+  .auth-tab.active {
+    background: #fff;
+    color: #667eea;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+  }
+  
+  .photo-upload { display: flex; flex-direction: column; align-items: center; margin-bottom: 20px; }
+  
+  .photo-preview {
+    width: 100px; height: 100px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 40px;
+    color: white;
+    cursor: pointer;
+    overflow: hidden;
+    position: relative;
+    border: 4px solid #f0f2f5;
+    transition: 0.2s;
+  }
+  
+  .photo-preview:hover { border-color: #667eea; }
+  .photo-preview img { width: 100%; height: 100%; object-fit: cover; }
+  
+  .photo-preview .cam-icon {
+    position: absolute;
+    bottom: 0; right: 0;
+    background: #667eea;
+    color: white;
+    width: 30px; height: 30px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    border: 3px solid #fff;
+  }
+  
+  .photo-hint { font-size: 11px; color: #888; margin-top: 8px; }
+  
+  .field { margin-bottom: 15px; }
+  .field label {
+    display: block;
+    font-size: 12px;
+    color: #555;
+    font-weight: 600;
+    margin-bottom: 6px;
+  }
+  
+  .field input {
+    width: 100%;
+    padding: 12px 14px;
+    border: 2px solid #eee;
+    border-radius: 10px;
+    font-size: 14px;
+    outline: none;
+    transition: 0.2s;
+  }
+  
+  .field input:focus { border-color: #667eea; }
+  
+  .field .error { color: #ef4444; font-size: 11px; margin-top: 4px; display: none; }
+  .field.error input { border-color: #ef4444; }
+  .field.error .error { display: block; }
+  
+  .btn-primary {
+    width: 100%;
+    padding: 13px;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.2s;
+  }
+  
+  .btn-primary:hover { opacity: 0.92; transform: translateY(-1px); }
+  .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+  
+  .auth-switch { text-align: center; margin-top: 15px; font-size: 13px; color: #666; }
+  .auth-switch a { color: #667eea; font-weight: 600; cursor: pointer; text-decoration: none; }
+  
+  /* Admin Login Special */
+  .admin-login-box {
+    border: 2px solid #667eea;
+    position: relative;
+  }
+  
+  .admin-login-box::before {
+    content: '🔒 SECURE ADMIN';
+    position: absolute;
+    top: -12px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #667eea;
+    color: white;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 4px 12px;
+    border-radius: 10px;
+    letter-spacing: 1px;
+  }
+  
+  .admin-icon {
+    width: 80px; height: 80px;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 40px;
+    margin: 0 auto 15px;
+    box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+  }
+  
+  .error-message {
+    background: #fee;
+    color: #ef4444;
+    padding: 10px 14px;
+    border-radius: 8px;
+    font-size: 12px;
+    margin-bottom: 15px;
+    display: none;
+    border-left: 3px solid #ef4444;
+  }
+  
+  .error-message.show { display: block; animation: shake 0.3s; }
+  
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    75% { transform: translateX(5px); }
+  }
+  
+  .success-message {
+    background: #d1fae5;
+    color: #059669;
+    padding: 10px 14px;
+    border-radius: 8px;
+    font-size: 12px;
+    margin-bottom: 15px;
+    display: none;
+    border-left: 3px solid #10b981;
+  }
+  
+  .success-message.show { display: block; }
+  
+  /* ============ MAIN APP ============ */
+  .app {
+    display: flex;
+    height: 100vh;
+    background: #f0f2f5;
+    max-width: 1200px;
+    margin: 0 auto;
+    box-shadow: 0 0 40px rgba(0,0,0,0.3);
+  }
+  
+  .hidden { display: none !important; }
+  
+  .sidebar {
+    width: 320px;
+    background: #fff;
+    border-right: 1px solid #e4e6eb;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .sidebar-profile {
+    padding: 18px;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  
+  .avatar-img {
+    width: 45px; height: 45px;
+    border-radius: 50%;
+    object-fit: cover;
+    flex-shrink: 0;
+    border: 2px solid rgba(255,255,255,0.4);
+  }
+  
+  .avatar-wrapper {
+    position: relative;
+    flex-shrink: 0;
+    display: inline-block;
+  }
+  
+  .avatar-wrapper.online::after {
+    content: '';
+    position: absolute;
+    bottom: 0; right: 0;
+    width: 12px; height: 12px;
+    background: #4ade80;
+    border: 2px solid #fff;
+    border-radius: 50%;
+  }
+  
+  .avatar-wrapper .avatar-letter {
+    width: 45px; height: 45px;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 18px;
+  }
+  
+  .profile-info { flex: 1; overflow: hidden; cursor: pointer; }
+  .profile-info h3 { font-size: 15px; margin-bottom: 3px; }
+  .profile-info p { font-size: 11px; opacity: 0.9; }
+  
+  .profile-actions { display: flex; gap: 6px; }
+  
+  .icon-btn {
+    background: rgba(255,255,255,0.2);
+    border: none;
+    color: white;
+    width: 32px; height: 32px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: 0.2s;
+  }
+  
+  .icon-btn:hover { background: rgba(255,255,255,0.35); }
+  
+  .tabs {
+    display: flex;
+    background: #fff;
+    border-bottom: 1px solid #e4e6eb;
+  }
+  
+  .tab {
+    flex: 1;
+    padding: 14px 8px;
+    text-align: center;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 600;
+    color: #666;
+    border-bottom: 3px solid transparent;
+    transition: 0.2s;
+  }
+  
+  .tab:hover { background: #f7f8fa; }
+  .tab.active { color: #667eea; border-bottom-color: #667eea; }
+  
+  .tab-content {
+    flex: 1;
+    overflow-y: auto;
+    display: none;
+  }
+  
+  .tab-content.active { display: block; }
+  
+  .list-item {
+    padding: 12px 18px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    transition: 0.2s;
+    border-bottom: 1px solid #f7f8fa;
+  }
+  
+  .list-item:hover { background: #f7f8fa; }
+  
+  .list-item.active {
+    background: #e8f0ff;
+    border-left: 4px solid #667eea;
+    padding-left: 14px;
+  }
+  
+  .avatar-small {
+    width: 42px; height: 42px;
+    border-radius: 50%;
+    object-fit: cover;
+    flex-shrink: 0;
+  }
+  
+  .avatar-small-letter {
+    width: 42px; height: 42px;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 16px;
+    flex-shrink: 0;
+  }
+  
+  .room-avatar {
+    width: 42px; height: 42px;
+    background: linear-gradient(135deg, #f59e0b, #ef4444);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    flex-shrink: 0;
+  }
+  
+  .group-avatar {
+    width: 42px; height: 42px;
+    background: linear-gradient(135deg, #10b981, #059669);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    flex-shrink: 0;
+  }
+  
+  .item-info { flex: 1; overflow: hidden; }
+  .item-info h4 { font-size: 14px; color: #333; margin-bottom: 3px; }
+  .item-info p {
+    font-size: 12px;
+    color: #888;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  
+  .item-badge {
+    background: #ef4444;
+    color: white;
+    font-size: 10px;
+    padding: 2px 7px;
+    border-radius: 10px;
+    font-weight: 600;
+  }
+  
+  .empty-state {
+    padding: 30px 20px;
+    text-align: center;
+    color: #999;
+    font-size: 13px;
+    line-height: 1.6;
+  }
+  
+  .empty-state .icon { font-size: 40px; margin-bottom: 10px; opacity: 0.5; }
+  
+  .action-btn {
+    padding: 10px;
+    margin: 10px 18px;
+    background: #f0f4ff;
+    color: #667eea;
+    border: 2px dashed #667eea;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+    width: calc(100% - 36px);
+  }
+  
+  .action-btn:hover { background: #e8f0ff; }
+  
+  .chat-area {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    background: #f8f9fa;
+    min-width: 0;
+  }
+  
+  .chat-header {
+    background: #fff;
+    padding: 15px 22px;
+    border-bottom: 1px solid #e4e6eb;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-height: 70px;
+  }
+  
+  .chat-header h3 { font-size: 15px; color: #333; margin-bottom: 3px; }
+  .chat-header p { font-size: 12px; color: #4ade80; }
+  .chat-header p.offline { color: #888; }
+  
+  .chat-header .header-actions { margin-left: auto; display: flex; gap: 8px; }
+  
+  .chat-body {
+    flex: 1;
+    padding: 22px;
+    overflow-y: auto;
+  }
+  
+  .chat-body::-webkit-scrollbar { width: 6px; }
+  .chat-body::-webkit-scrollbar-thumb { background: #ccc; border-radius: 3px; }
+  
+  .message-row {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 10px;
+    align-items: flex-end;
+  }
+  
+  .message-row.mine { flex-direction: row-reverse; }
+  
+  .message-avatar {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    object-fit: cover;
+    flex-shrink: 0;
+  }
+  
+  .message-avatar-letter {
+    width: 32px; height: 32px;
+    background: #ddd;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 12px;
+    color: #555;
+    flex-shrink: 0;
+  }
+  
+  .message {
+    max-width: 60%;
+    padding: 10px 14px;
+    border-radius: 16px;
+    font-size: 14px;
+    line-height: 1.5;
+    word-wrap: break-word;
+    animation: fadeIn 0.25s ease;
+  }
+  
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  
+  .my-message {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: #fff;
+    border-bottom-right-radius: 4px;
+  }
+  
+  .other-message {
+    background: #fff;
+    color: #333;
+    border-bottom-left-radius: 4px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+  }
+  
+  .message .sender {
+    font-size: 11px;
+    font-weight: 700;
+    display: block;
+    margin-bottom: 3px;
+    opacity: 0.85;
+  }
+  
+  .my-message .sender { color: rgba(255,255,255,0.9); }
+  .other-message .sender { color: #667eea; }
+  
+  .message .time {
+    font-size: 10px;
+    opacity: 0.65;
+    display: block;
+    margin-top: 4px;
+    text-align: right;
+  }
+  
+  .chat-footer {
+    padding: 15px 22px;
+    background: #fff;
+    border-top: 1px solid #e4e6eb;
+    display: flex;
+    gap: 10px;
+  }
+  
+  .chat-footer input {
+    flex: 1;
+    padding: 12px 18px;
+    border: 2px solid #eee;
+    border-radius: 25px;
+    outline: none;
+    font-size: 14px;
+  }
+  
+  .chat-footer input:focus { border-color: #667eea; }
+  
+  .chat-footer button {
+    width: 45px; height: 45px;
+    border: none;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 18px;
+  }
+  
+  .chat-footer button:hover { transform: scale(1.08); }
+  
+  .no-chat {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    color: #888;
+    gap: 8px;
+    padding: 20px;
+    text-align: center;
+  }
+  
+  .no-chat .icon { font-size: 64px; opacity: 0.5; margin-bottom: 10px; }
+  .no-chat h3 { color: #555; margin-bottom: 5px; }
+  
+  /* Modals */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 200;
+    padding: 20px;
+  }
+  
+  .modal {
+    background: #fff;
+    border-radius: 15px;
+    padding: 25px;
+    width: 420px;
+    max-width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+  
+  .modal h3 { font-size: 18px; margin-bottom: 6px; color: #333; }
+  .modal .sub { font-size: 13px; color: #666; margin-bottom: 18px; }
+  
+  .modal input[type="text"], .modal input[type="password"] {
+    width: 100%;
+    padding: 12px;
+    border: 2px solid #eee;
+    border-radius: 10px;
+    margin-bottom: 12px;
+    font-size: 14px;
+    outline: none;
+  }
+  
+  .modal input:focus { border-color: #667eea; }
+  
+  .modal button {
+    padding: 12px 18px;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-size: 14px;
+    cursor: pointer;
+    font-weight: 600;
+    width: 100%;
+    margin-bottom: 8px;
+  }
+  
+  .modal button.secondary { background: #f0f2f5; color: #555; }
+  .modal button:hover { opacity: 0.9; }
+  
+  .user-search-item {
+    padding: 12px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: 0.2s;
+    border: 2px solid transparent;
+  }
+  
+  .user-search-item:hover { background: #f7f8fa; }
+  .user-search-item.selected { background: #e8f0ff; border-color: #667eea; }
+  
+  .checkbox-circle {
+    width: 22px; height: 22px;
+    border: 2px solid #ccc;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    color: white;
+    flex-shrink: 0;
+  }
+  
+  .user-search-item.selected .checkbox-circle {
+    background: #667eea;
+    border-color: #667eea;
+  }
+  
+  .user-search-item.selected .checkbox-circle::after { content: '✓'; }
+  
+  .profile-modal-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+  
+  .profile-modal-avatar {
+    width: 100px; height: 100px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 40px;
+    color: white;
+    cursor: pointer;
+    overflow: hidden;
+    position: relative;
+    border: 4px solid #f0f2f5;
+    transition: 0.2s;
+  }
+  
+  .profile-modal-avatar:hover { border-color: #667eea; }
+  .profile-modal-avatar img { width: 100%; height: 100%; object-fit: cover; }
+  
+  .profile-modal-avatar .cam-icon {
+    position: absolute;
+    bottom: 0; right: 0;
+    background: #667eea;
+    color: white;
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 15px;
+    border: 3px solid #fff;
+  }
+  
+  .section-divider {
+    text-align: center;
+    font-size: 11px;
+    color: #999;
+    margin: 20px 0 15px;
+    position: relative;
+  }
+  
+  .section-divider::before, .section-divider::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    width: 35%;
+    height: 1px;
+    background: #eee;
+  }
+  
+  .section-divider::before { left: 0; }
+  .section-divider::after { right: 0; }
+  
+  /* Admin Panel */
+  .admin-view {
+    display: none;
+    height: 100vh;
+    background: #f0f2f5;
+  }
+  
+  .admin-view.active { display: flex; }
+  
+  .admin-sidebar {
+    width: 320px;
+    background: #fff;
+    border-right: 1px solid #e4e6eb;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .admin-sidebar-header {
+    padding: 20px;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+  }
+  
+  .admin-sidebar-header h2 { font-size: 18px; margin-bottom: 4px; }
+  .admin-sidebar-header p { font-size: 12px; opacity: 0.9; }
+  
+  .admin-main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    background: #f8f9fa;
+  }
+  
+  /* Session Timer */
+  .session-timer {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    background: rgba(255,255,255,0.15);
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+    margin-right: 8px;
+  }
+  
+  .session-timer.warning {
+    background: rgba(239, 68, 68, 0.3);
+    animation: pulse 1s infinite;
+  }
+  
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.6; }
+  }
+  
+  /* Activity Log */
+  .log-item {
+    padding: 12px 18px;
+    border-bottom: 1px solid #f7f8fa;
+    font-size: 12px;
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+  }
+  
+  .log-icon {
+    width: 30px; height: 30px;
+    border-radius: 50%;
+    background: #f0f4ff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    flex-shrink: 0;
+  }
+  
+  .log-icon.login { background: #d1fae5; color: #059669; }
+  .log-icon.logout { background: #fee2e2; color: #dc2626; }
+  .log-icon.message { background: #dbeafe; color: #2563eb; }
+  .log-icon.user { background: #fef3c7; color: #d97706; }
+  .log-icon.room { background: #fce7f3; color: #db2777; }
+  .log-icon.delete { background: #fee2e2; color: #dc2626; }
+  
+  .log-content { flex: 1; }
+  .log-content p { color: #333; line-height: 1.4; margin-bottom: 3px; }
+  .log-content .time { color: #999; font-size: 10px; }
+  
+  .log-filters {
+    padding: 12px 18px;
+    background: #f7f8fa;
+    border-bottom: 1px solid #e4e6eb;
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+  
+  .log-filter {
+    padding: 5px 10px;
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 15px;
+    font-size: 11px;
+    cursor: pointer;
+    transition: 0.2s;
+    color: #666;
+  }
+  
+  .log-filter:hover { border-color: #667eea; color: #667eea; }
+  .log-filter.active {
+    background: #667eea;
+    color: white;
+    border-color: #667eea;
+  }
+  
+  @media (max-width: 768px) {
+    .app { position: relative; }
+    .sidebar { position: absolute; z-index: 10; height: 100%; transition: transform 0.3s; }
+    .sidebar.hide { transform: translateX(-100%); }
+    .back-btn { display: flex !important; }
+  }
+  
+  .back-btn {
+    display: none;
+    background: #f0f2f5;
+    border: none;
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 16px;
+    align-items: center;
+    justify-content: center;
+  }
+</style>
+</head>
+<body>
+
+<!-- ============ USER AUTH SCREEN ============ -->
+<div class="auth-screen" id="authScreen">
+  <div class="auth-box">
+    <h2>💬 Live Chat</h2>
+    <p class="sub">Chat garna login garnus</p>
+    
+    <div class="auth-tabs">
+      <div class="auth-tab active" id="tabLogin" onclick="switchAuth('login')">🔑 Login</div>
+      <div class="auth-tab" id="tabRegister" onclick="switchAuth('register')">📝 Register</div>
+    </div>
+    
+    <div id="loginForm">
+      <div class="field">
+        <label>Username</label>
+        <input type="text" id="loginUsername" placeholder="Tapaiko username" maxlength="20" autocomplete="off">
+        <div class="error">Username lekhnus</div>
+      </div>
+      <div class="field">
+        <label>Password</label>
+        <input type="password" id="loginPassword" placeholder="Tapaiko password" maxlength="30">
+        <div class="error">Password lekhnus</div>
+      </div>
+      <button class="btn-primary" onclick="doLogin()">Login</button>
+      <div class="auth-switch">Account chaina? <a onclick="switchAuth('register')">Register garnus</a></div>
+    </div>
+    
+    <div id="registerForm" class="hidden">
+      <div class="photo-upload">
+        <div class="photo-preview" onclick="document.getElementById('photoInput').click()">
+          <span id="photoPlaceholder">👤</span>
+          <img id="photoImg" class="hidden" alt="">
+          <div class="cam-icon">📷</div>
+        </div>
+        <input type="file" id="photoInput" accept="image/*" style="display:none" onchange="handleRegisterPhoto(event)">
+        <p class="photo-hint">Photo upload (optional)</p>
+      </div>
+      
+      <div class="field">
+        <label>Username</label>
+        <input type="text" id="regUsername" placeholder="Unique username" maxlength="20">
+        <div class="error">Username lekhnus</div>
+      </div>
+      <div class="field">
+        <label>Password</label>
+        <input type="password" id="regPassword" placeholder="Minimum 4 characters" maxlength="30">
+        <div class="error">Password minimum 4 characters</div>
+      </div>
+      <div class="field">
+        <label>Confirm Password</label>
+        <input type="password" id="regConfirm" placeholder="Password feri lekhnus" maxlength="30">
+        <div class="error">Password milena</div>
+      </div>
+      <button class="btn-primary" onclick="doRegister()">Register</button>
+      <div class="auth-switch">Account chha? <a onclick="switchAuth('login')">Login garnus</a></div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ ADMIN LOGIN SCREEN ============ -->
+<div class="auth-screen hidden" id="adminLoginScreen">
+  <div class="auth-box admin-login-box">
+    <div class="admin-icon">🔐</div>
+    <h2>Admin Login</h2>
+    <p class="sub">Yo page admin ko lagi matra ho</p>
+    
+    <div class="error-message" id="adminError"></div>
+    <div class="success-message" id="adminSuccess"></div>
+    
+    <div class="field">
+      <label>Admin Username</label>
+      <input type="text" id="adminUsername" placeholder="admin" autocomplete="off" 
+             onkeypress="if(event.key==='Enter') document.getElementById('adminPassword').focus()">
+    </div>
+    
+    <div class="field">
+      <label>Admin Password</label>
+      <input type="password" id="adminPassword" placeholder="Password..." autocomplete="off"
+             onkeypress="if(event.key==='Enter') doAdminLogin()">
+    </div>
+    
+    <button class="btn-primary" id="adminLoginBtn" onclick="doAdminLogin()">
+      🔓 Login as Admin
+    </button>
+    
+    <div class="auth-switch" style="margin-top:20px;">
+      <a onclick="goToUserChat()">← User Chat ma jaanus</a>
+    </div>
+  </div>
+</div>
+
+<!-- ============ USER VIEW ============ -->
+<div class="app user-view hidden" id="userView">
+  <div class="sidebar" id="sidebar">
+    <div class="sidebar-profile">
+      <div class="avatar-wrapper">
+        <img id="myAvatar" class="avatar-img hidden" alt="">
+        <div id="myAvatarLetter" class="avatar-letter">U</div>
+      </div>
+      <div class="profile-info" onclick="openProfileSettings()">
+        <h3 id="myName">User</h3>
+        <p>⚙️ Profile Settings</p>
+      </div>
+      <div class="profile-actions">
+        <button class="icon-btn" onclick="openAddFriend()" title="Add Friend">➕</button>
+        <button class="icon-btn" onclick="logout()" title="Logout">🚪</button>
+      </div>
+    </div>
+    
+    <div class="tabs">
+      <div class="tab active" id="tabFriends" onclick="switchTab('friends')">👥 Friends</div>
+      <div class="tab" id="tabRooms" onclick="switchTab('rooms')">🏠 Rooms</div>
+      <div class="tab" id="tabGroups" onclick="switchTab('groups')">👨‍👩‍👦 Groups</div>
+    </div>
+    
+    <div class="tab-content active" id="contentFriends">
+      <div id="friendsList"></div>
+      <button class="action-btn" onclick="openAddFriend()">➕ Add New Friend</button>
+    </div>
+    
+    <div class="tab-content" id="contentRooms">
+      <div id="roomsList"></div>
+      <button class="action-btn" onclick="openCreateRoom()">➕ Create New Room</button>
+    </div>
+    
+    <div class="tab-content" id="contentGroups">
+      <div id="groupsList"></div>
+      <button class="action-btn" onclick="openCreateGroup()">➕ Create New Group</button>
+    </div>
+  </div>
+  
+  <div class="chat-area">
+    <div class="no-chat" id="noChat">
+      <div class="icon">💬</div>
+      <h3>Chat select garnus</h3>
+      <p>Baya tarfa friend, room ya group select garnus</p>
+    </div>
+    
+    <div class="hidden" id="chatView" style="display:flex; flex-direction:column; height:100%;">
+      <div class="chat-header">
+        <button class="back-btn" onclick="toggleSidebar()">←</button>
+        <div id="chatAvatarBox"></div>
+        <div>
+          <h3 id="chatName">User</h3>
+          <p id="chatStatus">● Online</p>
+        </div>
+        <div class="header-actions">
+          <button class="icon-btn" style="background:#f0f2f5; color:#555;" 
+                  onclick="clearCurrentChat()" title="Clear">🗑</button>
+        </div>
+      </div>
+      
+      <div class="chat-body" id="chatBody"></div>
+      
+      <div class="chat-footer">
+        <input type="text" id="userInput" placeholder="Message lekhnus..." autocomplete="off">
+        <button onclick="sendMessage()">➤</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ ADMIN VIEW ============ -->
+<div class="admin-view" id="adminView">
+  <div class="admin-sidebar">
+    <div class="admin-sidebar-header">
+      <div style="display:flex; justify-content:space-between; align-items:center; gap:10px;">
+        <div>
+          <h2>👨‍💼 Admin Panel</h2>
+          <p id="adminStats">0 users • 0 rooms</p>
+        </div>
+        <button onclick="adminLogout()" 
+                style="background:rgba(255,255,255,0.25); border:none; color:white; 
+                       padding:8px 12px; border-radius:8px; cursor:pointer; font-size:12px;
+                       font-weight:600;">
+          🚪 Logout
+        </button>
+      </div>
+      <div style="margin-top:12px;">
+        <div class="session-timer" id="sessionTimer">
+          ⏱️ <span id="sessionTime">30:00</span>
+        </div>
+      </div>
+    </div>
+    <div class="tabs">
+      <div class="tab active" id="adminTabUsers" onclick="switchAdminTab('users')">👥 Users</div>
+      <div class="tab" id="adminTabRooms" onclick="switchAdminTab('rooms')">🏠 Rooms</div>
+      <div class="tab" id="adminTabLogs" onclick="switchAdminTab('logs')">📊 Logs</div>
+    </div>
+    <div class="tab-content active" id="adminContentUsers" style="display:block;">
+      <div id="adminUsersList"></div>
+    </div>
+    <div class="tab-content" id="adminContentRooms">
+      <div id="adminRoomsList"></div>
+    </div>
+    <div class="tab-content" id="adminContentLogs">
+      <div class="log-filters">
+        <div class="log-filter active" data-filter="all" onclick="filterLogs('all')">All</div>
+        <div class="log-filter" data-filter="login" onclick="filterLogs('login')">🔑 Login</div>
+        <div class="log-filter" data-filter="message" onclick="filterLogs('message')">💬 Msg</div>
+        <div class="log-filter" data-filter="user" onclick="filterLogs('user')">👤 User</div>
+        <div class="log-filter" data-filter="room" onclick="filterLogs('room')">🏠 Room</div>
+        <div class="log-filter" data-filter="delete" onclick="filterLogs('delete')">🗑 Delete</div>
+      </div>
+      <div id="adminLogsList"></div>
+    </div>
+  </div>
+  
+  <div class="admin-main">
+    <div class="no-chat" id="adminNoChat">
+      <div class="icon">💬</div>
+      <h3>Chat select garnus</h3>
+      <p>Baya tarfa bata chhannus</p>
+    </div>
+    <div class="hidden" id="adminChatView" style="display:flex; flex-direction:column; height:100%;">
+      <div class="chat-header">
+        <div id="adminChatAvatarBox"></div>
+        <div>
+          <h3 id="adminChatName">User</h3>
+          <p id="adminChatStatus">● Room</p>
+        </div>
+        <div class="header-actions">
+          <button class="icon-btn" style="background:#fee; color:#ef4444;" 
+                  onclick="adminClearChat()">🗑</button>
+        </div>
+      </div>
+      <div class="chat-body" id="adminChatBody"></div>
+      <div class="chat-footer">
+        <input type="text" id="adminInput" placeholder="Reply lekhnus..." autocomplete="off">
+        <button onclick="adminSendReply()">➤</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ MODALS ============ -->
+
+<div class="modal-overlay hidden" id="addFriendModal">
+  <div class="modal">
+    <h3>➕ Add Friend</h3>
+    <p class="sub">Username lekhera khojnus</p>
+    <input type="text" id="friendSearchInput" placeholder="Username..." oninput="searchUsers()">
+    <div id="searchResults"></div>
+    <button class="secondary" onclick="closeModal('addFriendModal')" style="margin-top:15px;">Close</button>
+  </div>
+</div>
+
+<div class="modal-overlay hidden" id="createRoomModal">
+  <div class="modal">
+    <h3>➕ Create New Room</h3>
+    <p class="sub">Room ko naam lekhnus (public hunchha)</p>
+    <input type="text" id="roomNameInput" placeholder="Example: friends-group" maxlength="20">
+    <button onclick="createRoom()">Create Room</button>
+    <button class="secondary" onclick="closeModal('createRoomModal')">Cancel</button>
+  </div>
+</div>
+
+<div class="modal-overlay hidden" id="createGroupModal">
+  <div class="modal">
+    <h3>👨‍👩‍👦 Create Group</h3>
+    <p class="sub">Group ko naam ra members chhannus</p>
+    <input type="text" id="groupNameInput" placeholder="Group name..." maxlength="30">
+    <div style="max-height:280px; overflow-y:auto; margin:10px 0;" id="groupMembersList"></div>
+    <button onclick="createGroup()">Create Group</button>
+    <button class="secondary" onclick="closeModal('createGroupModal')">Cancel</button>
+  </div>
+</div>
+
+<div class="modal-overlay hidden" id="profileModal">
+  <div class="modal">
+    <h3>⚙️ Profile Settings</h3>
+    <p class="sub">Photo ra password change garnus</p>
+    
+    <div class="profile-modal-header">
+      <div class="profile-modal-avatar" onclick="document.getElementById('profilePhotoInput').click()">
+        <img id="profilePhotoImg" class="hidden" alt="">
+        <span id="profilePhotoLetter">U</span>
+        <div class="cam-icon">📷</div>
+      </div>
+      <input type="file" id="profilePhotoInput" accept="image/*" style="display:none" onchange="handleProfilePhoto(event)">
+      <p class="photo-hint" style="margin-top:8px;">Photo change garna click garnus</p>
+      <button style="width:auto; padding:8px 16px; font-size:12px; margin-top:10px;" 
+              onclick="saveProfilePhoto()">💾 Save Photo</button>
+    </div>
+    
+    <div class="section-divider">PASSWORD CHANGE</div>
+    
+    <div class="field">
+      <label>Current Password</label>
+      <input type="password" id="currentPassword" placeholder="Ahile ko password">
+    </div>
+    <div class="field">
+      <label>New Password</label>
+      <input type="password" id="newPassword" placeholder="Naya password (min 4)">
+    </div>
+    <div class="field">
+      <label>Confirm New Password</label>
+      <input type="password" id="confirmNewPassword" placeholder="Naya password feri">
+    </div>
+    <button onclick="changePassword()">🔐 Change Password</button>
+    
+    <button class="secondary" onclick="closeModal('profileModal')" style="margin-top:15px;">Close</button>
+  </div>
+</div>
+
+<script>
+  // ============================================================
+  // 🔐 ADMIN CREDENTIALS - YO FIXED CHHA, CHANGE HUNA SAKDAINA
+  // ============================================================
+  const ADMIN_CREDENTIALS = {
+    username: 'admin',
+    password: 'admin2041'
+  };
+  // ============================================================
+  // ⚠️ YO FIXED CHHA - Code ma change gare matra change hunchha
+  // ============================================================
+  
+  const ADMIN_SESSION_KEY = 'adminSession_v4';
+  const ACTIVITY_LOG_KEY = 'activityLog_v4';
+  const SESSION_TIMEOUT = 30 * 60 * 1000; // 30 minutes
+  
+  // ==================== CONFIG ====================
+  const KEYS = {
+    USERS: 'chatUsers_v5',
+    MESSAGES: 'chatMessages_v5',
+    ACTIVE: 'chatActive_v5',
+    ROOMS: 'chatRooms_v5',
+    GROUPS: 'chatGroups_v5',
+    FRIENDS: 'chatFriends_v5',
+    SESSION: 'chatSession_v5'
+  };
+  
+  const TIMEOUT = 30000;
+  
+  // ==================== URL ====================
+  const urlParams = new URLSearchParams(window.location.search);
+  const isAdmin = urlParams.get('admin') === 'true';
+  
+  // ==================== STATE ====================
+  let currentUser = '';
+  let sessionId = '';
+  let activeChat = null;
+  let adminActiveChat = null;
+  let lastRenderCount = 0;
+  let tempPhoto = '';
+  let tempProfilePhoto = '';
+  let selectedGroupMembers = [];
+  
+  // Session tracking
+  let lastAdminActivity = Date.now();
+  let sessionTimerInterval = null;
+  let lastUserActivity = Date.now();
+  
+  // Log filter
+  let currentLogFilter = 'all';
+  
+  // ==================== INIT ====================
+  window.onload = () => {
+    document.getElementById('authScreen').classList.add('hidden');
+    document.getElementById('adminLoginScreen').classList.add('hidden');
+    document.getElementById('userView').classList.add('hidden');
+    document.getElementById('adminView').classList.remove('active');
+    
+    if (isAdmin) {
+      document.title = '🔐 Admin Login';
+      
+      const adminSession = sessionStorage.getItem(ADMIN_SESSION_KEY);
+      
+      if (adminSession === 'logged_in') {
+        const lastActivity = parseInt(sessionStorage.getItem('adminLastActivity') || '0');
+        if (Date.now() - lastActivity < SESSION_TIMEOUT) {
+          showAdminPanel();
+        } else {
+          sessionStorage.removeItem(ADMIN_SESSION_KEY);
+          document.getElementById('adminLoginScreen').classList.remove('hidden');
+          setTimeout(() => document.getElementById('adminUsername').focus(), 200);
+        }
+      } else {
+        document.getElementById('adminLoginScreen').classList.remove('hidden');
+        setTimeout(() => {
+          const el = document.getElementById('adminUsername');
+          if (el) el.focus();
+        }, 200);
+      }
+    } else {
+      document.title = '💬 Live Chat';
+      
+      const saved = localStorage.getItem(KEYS.SESSION);
+      let userLoggedIn = false;
+      
+      if (saved) {
+        try {
+          const s = JSON.parse(saved);
+          if (s.user) {
+            const users = load(KEYS.USERS, {});
+            if (users[s.user]) {
+              currentUser = s.user;
+              sessionId = s.sessionId || generateId();
+              userLoggedIn = true;
+            }
+          }
+        } catch (e) {
+          console.error('Session error:', e);
+        }
+      }
+      
+      if (userLoggedIn) {
+        document.getElementById('userView').classList.remove('hidden');
+        initApp();
+      } else {
+        document.getElementById('authScreen').classList.remove('hidden');
+      }
+    }
+    
+    setInterval(syncData, 1000);
+    setInterval(() => {
+      if (!isAdmin && currentUser) registerActive();
+      cleanupInactive();
+    }, 5000);
+  };
+  
+  // ==================== ACTIVITY LOG ====================
+  function addLog(type, message, user = 'system') {
+    const logs = load(ACTIVITY_LOG_KEY, []);
+    logs.push({
+      id: generateId(),
+      type: type,
+      message: message,
+      user: user,
+      timestamp: Date.now()
+    });
+    
+    if (logs.length > 500) logs.splice(0, logs.length - 500);
+    save(ACTIVITY_LOG_KEY, logs);
+  }
+  
+  function getLogs() {
+    return load(ACTIVITY_LOG_KEY, []);
+  }
+  
+  function getLogIcon(type) {
+    const icons = {
+      login: '🔑',
+      logout: '🚪',
+      message: '💬',
+      user: '👤',
+      room: '🏠',
+      delete: '🗑️'
+    };
+    return icons[type] || '📌';
+  }
+  
+  function formatTime(ts) {
+    const d = new Date(ts);
+    const now = new Date();
+    const diff = now - d;
+    
+    if (diff < 60000) return 'Just now';
+    if (diff < 3600000) return Math.floor(diff / 60000) + ' min ago';
+    if (diff < 86400000) return Math.floor(diff / 3600000) + ' hour ago';
+    
+    return d.toLocaleString('en-US', {
+      month: 'short', day: 'numeric',
+      hour: '2-digit', minute: '2-digit'
+    });
+  }
+  
+  // ==================== ADMIN LOGIN ====================
+  function doAdminLogin() {
+    const usernameEl = document.getElementById('adminUsername');
+    const passwordEl = document.getElementById('adminPassword');
+    const errorEl = document.getElementById('adminError');
+    const successEl = document.getElementById('adminSuccess');
+    const btnEl = document.getElementById('adminLoginBtn');
+    
+    const username = usernameEl.value.trim();
+    const password = passwordEl.value;
+    
+    errorEl.classList.remove('show');
+    successEl.classList.remove('show');
+    
+    if (!username) {
+      showAdminError('⚠️ Username lekhnus!');
+      usernameEl.focus();
+      return;
+    }
+    
+    if (!password) {
+      showAdminError('⚠️ Password lekhnus!');
+      passwordEl.focus();
+      return;
+    }
+    
+    btnEl.disabled = true;
+    btnEl.textContent = '⏳ Checking...';
+    
+    setTimeout(() => {
+      const validUsername = username.toLowerCase() === ADMIN_CREDENTIALS.username.toLowerCase();
+      const validPassword = password === ADMIN_CREDENTIALS.password;
+      
+      if (!validUsername || !validPassword) {
+        btnEl.disabled = false;
+        btnEl.textContent = '🔓 Login as Admin';
+        showAdminError('❌ Username ya Password galat chha!');
+        passwordEl.value = '';
+        passwordEl.focus();
+        
+        addLog('login', '❌ Failed admin login attempt (username: ' + username + ')', 'admin');
+        return;
+      }
+      
+      sessionStorage.setItem(ADMIN_SESSION_KEY, 'logged_in');
+      sessionStorage.setItem('adminLastActivity', Date.now().toString());
+      
+      addLog('login', '✅ Admin logged in successfully', 'admin');
+      
+      btnEl.textContent = '✅ Success!';
+      successEl.textContent = '✅ Login safal bhayo!';
+      successEl.classList.add('show');
+      
+      setTimeout(() => {
+        showAdminPanel();
+      }, 500);
+    }, 400);
+  }
+  
+  function showAdminError(msg) {
+    const errorEl = document.getElementById('adminError');
+    const successEl = document.getElementById('adminSuccess');
+    successEl.classList.remove('show');
+    errorEl.textContent = msg;
+    errorEl.classList.remove('show');
+    void errorEl.offsetWidth;
+    errorEl.classList.add('show');
+  }
+  
+  function showAdminPanel() {
+    document.getElementById('adminLoginScreen').classList.add('hidden');
+    document.getElementById('authScreen').classList.add('hidden');
+    document.getElementById('userView').classList.add('hidden');
+    
+    document.getElementById('adminView').classList.add('active');
+    document.title = '👨‍💼 Admin Panel';
+    
+    lastAdminActivity = Date.now();
+    
+    startSessionTimer();
+    trackAdminActivity();
+    
+    renderAdminUsers();
+    renderAdminRooms();
+    renderAdminLogs();
+  }
+  
+  function trackAdminActivity() {
+    const events = ['click', 'keypress', 'mousemove', 'scroll', 'touchstart'];
+    events.forEach(evt => {
+      document.addEventListener(evt, () => {
+        if (sessionStorage.getItem(ADMIN_SESSION_KEY) === 'logged_in') {
+          lastAdminActivity = Date.now();
+          sessionStorage.setItem('adminLastActivity', lastAdminActivity.toString());
+        }
+      }, { passive: true });
+    });
+  }
+  
+  // ==================== SESSION TIMER ====================
+  function startSessionTimer() {
+    if (sessionTimerInterval) clearInterval(sessionTimerInterval);
+    
+    sessionTimerInterval = setInterval(() => {
+      if (sessionStorage.getItem(ADMIN_SESSION_KEY) !== 'logged_in') return;
+      
+      const elapsed = Date.now() - lastAdminActivity;
+      const remaining = SESSION_TIMEOUT - elapsed;
+      
+      if (remaining <= 0) {
+        clearInterval(sessionTimerInterval);
+        addLog('logout', '🕐 Auto logout - 30 min inactivity', 'admin');
+        sessionStorage.removeItem(ADMIN_SESSION_KEY);
+        alert('🕐 30 minutes inactivity bhayo. Auto logout gareko chha.');
+        window.location.reload();
+        return;
+      }
+      
+      const mins = Math.floor(remaining / 60000);
+      const secs = Math.floor((remaining % 60000) / 1000);
+      const timeStr = String(mins).padStart(2, '0') + ':' + String(secs).padStart(2, '0');
+      
+      const timerEl = document.getElementById('sessionTime');
+      const timerContainer = document.getElementById('sessionTimer');
+      
+      if (timerEl) timerEl.textContent = timeStr;
+      
+      if (timerContainer) {
+        if (remaining < 5 * 60 * 1000) {
+          timerContainer.classList.add('warning');
+        } else {
+          timerContainer.classList.remove('warning');
+        }
+      }
+    }, 1000);
+  }
+  
+  function adminLogout() {
+    if (!confirm('Admin panel bata logout garna chahanu hunchha?')) return;
+    
+    addLog('logout', '🚪 Admin manually logged out', 'admin');
+    
+    if (sessionTimerInterval) clearInterval(sessionTimerInterval);
+    sessionStorage.removeItem(ADMIN_SESSION_KEY);
+    sessionStorage.removeItem('adminLastActivity');
+    
+    document.getElementById('adminView').classList.remove('active');
+    document.getElementById('adminChatView').classList.add('hidden');
+    document.getElementById('adminNoChat').classList.remove('hidden');
+    
+    adminActiveChat = null;
+    
+    document.getElementById('adminUsername').value = '';
+    document.getElementById('adminPassword').value = '';
+    document.getElementById('adminError').classList.remove('show');
+    document.getElementById('adminSuccess').classList.remove('show');
+    document.getElementById('adminLoginBtn').disabled = false;
+    document.getElementById('adminLoginBtn').textContent = '🔓 Login as Admin';
+    
+    document.getElementById('adminLoginScreen').classList.remove('hidden');
+    document.title = '🔐 Admin Login';
+    
+    setTimeout(() => document.getElementById('adminUsername').focus(), 100);
+  }
+  
+  function goToUserChat() {
+    window.location.href = window.location.pathname;
+  }
+  
+  // ==================== STORAGE ====================
+  function load(key, def = []) {
+    try { return JSON.parse(localStorage.getItem(key) || JSON.stringify(def)); }
+    catch { return def; }
+  }
+  
+  function save(key, data) {
+    localStorage.setItem(key, JSON.stringify(data));
+  }
+  
+  function generateId() {
+    return 'id_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+  }
+  
+  // ==================== USER AUTH ====================
+  function switchAuth(mode) {
+    document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
+    if (mode === 'login') {
+      document.getElementById('tabLogin').classList.add('active');
+      document.getElementById('loginForm').classList.remove('hidden');
+      document.getElementById('registerForm').classList.add('hidden');
+    } else {
+      document.getElementById('tabRegister').classList.add('active');
+      document.getElementById('loginForm').classList.add('hidden');
+      document.getElementById('registerForm').classList.remove('hidden');
+    }
+  }
+  
+  function handleRegisterPhoto(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    if (file.size > 2 * 1024 * 1024) { alert('Photo 2MB bhanda thulo huna hunna!'); return; }
+    
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      compressImage(e.target.result, 200, (compressed) => {
+        tempPhoto = compressed;
+        document.getElementById('photoImg').src = compressed;
+        document.getElementById('photoImg').classList.remove('hidden');
+        document.getElementById('photoPlaceholder').classList.add('hidden');
+      });
+    };
+    reader.readAsDataURL(file);
+  }
+  
+  function compressImage(dataUrl, maxSize, callback) {
+    const img = new Image();
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      let w = img.width, h = img.height;
+      if (w > h) {
+        if (w > maxSize) { h = h * maxSize / w; w = maxSize; }
+      } else {
+        if (h > maxSize) { w = w * maxSize / h; h = maxSize; }
+      }
+      canvas.width = w;
+      canvas.height = h;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0, w, h);
+      callback(canvas.toDataURL('image/jpeg', 0.7));
+    };
+    img.src = dataUrl;
+  }
+  
+  function doRegister() {
+    const username = document.getElementById('regUsername').value.trim();
+    const password = document.getElementById('regPassword').value;
+    const confirm = document.getElementById('regConfirm').value;
+    
+    let valid = true;
+    if (!username) { setFieldError('regUsername', true); valid = false; }
+    else setFieldError('regUsername', false);
+    
+    if (!password || password.length < 4) { setFieldError('regPassword', true); valid = false; }
+    else setFieldError('regPassword', false);
+    
+    if (password !== confirm) { setFieldError('regConfirm', true); valid = false; }
+    else setFieldError('regConfirm', false);
+    
+    if (!valid) return;
+    
+    if (username.toLowerCase() === 'admin') {
+      alert('⚠️ "admin" username use garna mildaina!');
+      return;
+    }
+    
+    const users = load(KEYS.USERS, {});
+    const exists = Object.keys(users).find(u => u.toLowerCase() === username.toLowerCase());
+    
+    if (exists) { alert('Yo username pahile nai chha!'); return; }
+    
+    users[username] = {
+      password: password,
+      photo: tempPhoto || '',
+      createdAt: Date.now()
+    };
+    save(KEYS.USERS, users);
+    
+    addLog('user', '👤 New user registered: ' + username, username);
+    
+    alert('✅ Registration safal bhayo! Aba login garnus.');
+    
+    tempPhoto = '';
+    document.getElementById('photoImg').classList.add('hidden');
+    document.getElementById('photoPlaceholder').classList.remove('hidden');
+    document.getElementById('regUsername').value = '';
+    document.getElementById('regPassword').value = '';
+    document.getElementById('regConfirm').value = '';
+    
+    switchAuth('login');
+    document.getElementById('loginUsername').value = username;
+  }
+  
+  function doLogin() {
+    const username = document.getElementById('loginUsername').value.trim();
+    const password = document.getElementById('loginPassword').value;
+    
+    let valid = true;
+    if (!username) { setFieldError('loginUsername', true); valid = false; }
+    else setFieldError('loginUsername', false);
+    if (!password) { setFieldError('loginPassword', true); valid = false; }
+    else setFieldError('loginPassword', false);
+    
+    if (!valid) return;
+    
+    const users = load(KEYS.USERS, {});
+    const key = Object.keys(users).find(u => u.toLowerCase() === username.toLowerCase());
+    
+    if (!key) { alert('❌ Username bhetiyena!'); return; }
+    if (users[key].password !== password) { alert('❌ Password milena!'); return; }
+    
+    currentUser = key;
+    sessionId = generateId();
+    save(KEYS.SESSION, { user: key, sessionId });
+    
+    addLog('login', '🔑 User logged in: ' + key, key);
+    
+    document.getElementById('authScreen').classList.add('hidden');
+    document.getElementById('userView').classList.remove('hidden');
+    initApp();
+  }
+  
+  function setFieldError(id, hasError) {
+    const input = document.getElementById(id);
+    if (!input) return;
+    const field = input.closest('.field');
+    if (hasError) field.classList.add('error');
+    else field.classList.remove('error');
+  }
+  
+  function logout() {
+    if (!confirm('Logout garna chahanu hunchha?')) return;
+    
+    addLog('logout', '🚪 User logged out: ' + currentUser, currentUser);
+    
+    const actives = load(KEYS.ACTIVE, {});
+    delete actives[sessionId];
+    save(KEYS.ACTIVE, actives);
+    localStorage.removeItem(KEYS.SESSION);
+    location.reload();
+  }
+  
+  // ==================== HELPERS ====================
+  function getUserPhoto(username) {
+    const users = load(KEYS.USERS, {});
+    return users[username] ? (users[username].photo || '') : '';
+  }
+  
+  function getAllUsers() {
+    return Object.keys(load(KEYS.USERS, {}));
+  }
+  
+  function initApp() {
+    const photo = getUserPhoto(currentUser);
+    document.getElementById('myName').textContent = currentUser;
+    
+    if (photo) {
+      document.getElementById('myAvatar').src = photo;
+      document.getElementById('myAvatar').classList.remove('hidden');
+      document.getElementById('myAvatarLetter').classList.add('hidden');
+    } else {
+      document.getElementById('myAvatarLetter').textContent = currentUser.charAt(0).toUpperCase();
+    }
+    
+    renderFriends();
+    renderRooms();
+    renderGroups();
+    registerActive();
+  }
+  
+  function registerActive() {
+    if (!currentUser) return;
+    const actives = load(KEYS.ACTIVE, {});
+    actives[sessionId] = { user: currentUser, lastSeen: Date.now() };
+    save(KEYS.ACTIVE, actives);
+  }
+  
+  function cleanupInactive() {
+    const actives = load(KEYS.ACTIVE, {});
+    const now = Date.now();
+    let changed = false;
+    Object.keys(actives).forEach(id => {
+      if (now - actives[id].lastSeen > TIMEOUT) {
+        delete actives[id];
+        changed = true;
+      }
+    });
+    if (changed) save(KEYS.ACTIVE, actives);
+  }
+  
+  function getOnlineUsers() {
+    const actives = load(KEYS.ACTIVE, {});
+    const unique = {};
+    Object.values(actives).forEach(a => {
+      if (a.user !== currentUser) unique[a.user] = true;
+    });
+    return Object.keys(unique);
+  }
+  
+  function isUserOnline(name) {
+    const actives = load(KEYS.ACTIVE, {});
+    return Object.values(actives).some(a => a.user === name);
+  }
+  
+  // ==================== TABS ====================
+  function switchTab(tab) {
+    document.querySelectorAll('.user-view .tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.user-view .tab-content').forEach(c => c.classList.remove('active'));
+    
+    if (tab === 'friends') {
+      document.getElementById('tabFriends').classList.add('active');
+      document.getElementById('contentFriends').classList.add('active');
+    } else if (tab === 'rooms') {
+      document.getElementById('tabRooms').classList.add('active');
+      document.getElementById('contentRooms').classList.add('active');
+    } else {
+      document.getElementById('tabGroups').classList.add('active');
+      document.getElementById('contentGroups').classList.add('active');
+    }
+  }
+  
+  // ==================== FRIENDS ====================
+  function getMyFriends() {
+    const all = load(KEYS.FRIENDS, {});
+    return all[currentUser] || [];
+  }
+  
+  function addFriend(friendName) {
+    if (friendName === currentUser) { alert('Nijai lai add garna mildaina!'); return; }
+    
+    const all = load(KEYS.FRIENDS, {});
+    if (!all[currentUser]) all[currentUser] = [];
+    if (!all[friendName]) all[friendName] = [];
+    
+    if (!all[currentUser].includes(friendName)) {
+      all[currentUser].push(friendName);
+      if (!all[friendName].includes(currentUser)) all[friendName].push(currentUser);
+      save(KEYS.FRIENDS, all);
+      
+      addLog('user', '👥 ' + currentUser + ' added ' + friendName + ' as friend', currentUser);
+      
+      alert(friendName + ' lai friend banaunu bhayo! 🎉');
+      renderFriends();
+      closeModal('addFriendModal');
+    } else {
+      alert('Yo user pahile nai friend chha!');
+    }
+  }
+  
+  function avatarHtml(name, size = 'small') {
+    const photo = getUserPhoto(name);
+    const isOnline = isUserOnline(name);
+    const cls = size === 'small' ? 'avatar-small' : 'message-avatar';
+    const wrapperCls = 'avatar-wrapper' + (isOnline ? ' online' : '');
+    
+    if (photo) {
+      return `<div class="${wrapperCls}"><img src="${photo}" class="${cls}" alt=""></div>`;
+    } else {
+      const letterCls = size === 'small' ? 'avatar-small-letter' : 'message-avatar-letter';
+      return `<div class="${wrapperCls}"><div class="${letterCls}">${name.charAt(0).toUpperCase()}</div></div>`;
+    }
+  }
+  
+  function renderFriends() {
+    const friends = getMyFriends();
+    const messages = load(KEYS.MESSAGES, []);
+    const list = document.getElementById('friendsList');
+    
+    if (friends.length === 0) {
+      list.innerHTML = '<div class="empty-state"><div class="icon">👥</div>Koi friend chaina.<br>➕ button le add garnus.</div>';
+      return;
+    }
+    
+    const online = getOnlineUsers();
+    friends.sort((a, b) => {
+      const aOn = online.includes(a), bOn = online.includes(b);
+      if (aOn && !bOn) return -1;
+      if (!aOn && bOn) return 1;
+      return a.localeCompare(b);
+    });
+    
+    list.innerHTML = friends.map(f => {
+      const isOnline = online.includes(f);
+      const chatId = getPrivateChatId(currentUser, f);
+      const chatMsgs = messages.filter(m => m.chatId === chatId);
+      const lastMsg = chatMsgs[chatMsgs.length - 1];
+      const unread = chatMsgs.filter(m => m.from !== currentUser && !m.read).length;
+      
+      return `
+        <div class="list-item ${activeChat && activeChat.id === chatId ? 'active' : ''}" 
+             onclick="openFriendChat('${escapeAttr(f)}', '${chatId}')">
+          ${avatarHtml(f, 'small')}
+          <div class="item-info">
+            <h4>${escapeHtml(f)}</h4>
+            <p>${lastMsg ? escapeHtml(lastMsg.text).substring(0, 28) : (isOnline ? '● Online' : 'Offline')}</p>
+          </div>
+          ${unread > 0 ? `<div class="item-badge">${unread}</div>` : ''}
+        </div>
+      `;
+    }).join('');
+  }
+  
+  function getPrivateChatId(u1, u2) {
+    return 'private_' + [u1, u2].sort().join('_');
+  }
+  
+  function openFriendChat(friend, chatId) {
+    activeChat = { type: 'friend', id: chatId, name: friend, friend: friend };
+    openChatView();
+    renderChat();
+    markChatRead(chatId);
+  }
+  
+  // ==================== ROOMS ====================
+  function getRooms() {
+    return load(KEYS.ROOMS, ['general', 'help', 'random']);
+  }
+  
+  function createRoom() {
+    const name = document.getElementById('roomNameInput').value.trim().toLowerCase().replace(/\s+/g, '-');
+    if (!name) { alert('Room ko naam lekhnus!'); return; }
+    
+    const rooms = getRooms();
+    if (rooms.includes(name)) { alert('Yo room pahile nai chha!'); return; }
+    
+    rooms.push(name);
+    save(KEYS.ROOMS, rooms);
+    
+    addLog('room', '🏠 New room created: #' + name, currentUser);
+    
+    const messages = load(KEYS.MESSAGES, []);
+    messages.push({
+      id: generateId(),
+      chatId: 'room_' + name,
+      from: 'System',
+      type: 'system',
+      text: '🎉 Room "' + name + '" create bhayo!',
+      time: getTime(),
+      read: true
+    });
+    save(KEYS.MESSAGES, messages);
+    
+    closeModal('createRoomModal');
+    renderRooms();
+    alert('Room "' + name + '" create bhayo!');
+  }
+  
+  function renderRooms() {
+    const rooms = getRooms();
+    const messages = load(KEYS.MESSAGES, []);
+    const list = document.getElementById('roomsList');
+    
+    list.innerHTML = rooms.map(r => {
+      const chatId = 'room_' + r;
+      const chatMsgs = messages.filter(m => m.chatId === chatId);
+      const lastMsg = chatMsgs[chatMsgs.length - 1];
+      const unread = chatMsgs.filter(m => m.from !== currentUser && !m.read && m.type !== 'system').length;
+      
+      return `
+        <div class="list-item ${activeChat && activeChat.id === chatId ? 'active' : ''}" 
+             onclick="openRoomChat('${escapeAttr(r)}', '${chatId}')">
+          <div class="room-avatar">🏠</div>
+          <div class="item-info">
+            <h4>#${escapeHtml(r)}</h4>
+            <p>${lastMsg ? escapeHtml(lastMsg.text).substring(0, 28) : 'Room'}</p>
+          </div>
+          ${unread > 0 ? `<div class="item-badge">${unread}</div>` : ''}
+        </div>
+      `;
+    }).join('');
+  }
+  
+  function openRoomChat(room, chatId) {
+    activeChat = { type: 'room', id: chatId, name: '#' + room, room: room };
+    openChatView();
+    renderChat();
+    markChatRead(chatId);
+  }
+  
+  // ==================== GROUPS ====================
+  function getMyGroups() {
+    const all = load(KEYS.GROUPS, {});
+    return Object.values(all).filter(g => g.members && g.members.includes(currentUser));
+  }
+  
+  function openCreateGroup() {
+    selectedGroupMembers = [];
+    document.getElementById('groupNameInput').value = '';
+    
+    const friends = getMyFriends();
+    const list = document.getElementById('groupMembersList');
+    
+    if (friends.length === 0) {
+      list.innerHTML = '<p style="text-align:center; color:#888; padding:15px; font-size:13px;">Pahile friend banaunus</p>';
+    } else {
+      list.innerHTML = friends.map(f => `
+        <div class="user-search-item" id="gm_${escapeAttr(f)}" onclick="toggleGroupMember('${escapeAttr(f)}')">
+          ${avatarHtml(f, 'small')}
+          <div class="item-info">
+            <h4>${escapeHtml(f)}</h4>
+          </div>
+          <div class="checkbox-circle"></div>
+        </div>
+      `).join('');
+    }
+    
+    document.getElementById('createGroupModal').classList.remove('hidden');
+  }
+  
+  function toggleGroupMember(name) {
+    const idx = selectedGroupMembers.indexOf(name);
+    const el = document.getElementById('gm_' + name);
+    
+    if (idx === -1) {
+      selectedGroupMembers.push(name);
+      el.classList.add('selected');
+    } else {
+      selectedGroupMembers.splice(idx, 1);
+      el.classList.remove('selected');
+    }
+  }
+  
+  function createGroup() {
+    const name = document.getElementById('groupNameInput').value.trim();
+    if (!name) { alert('Group ko naam lekhnus!'); return; }
+    if (selectedGroupMembers.length < 1) { alert('Kamti 1 jon friend chhannus!'); return; }
+    
+    const groupId = 'group_' + generateId();
+    const all = load(KEYS.GROUPS, {});
+    
+    all[groupId] = {
+      id: groupId,
+      name: name,
+      owner: currentUser,
+      members: [currentUser, ...selectedGroupMembers],
+      createdAt: Date.now()
+    };
+    save(KEYS.GROUPS, all);
+    
+    addLog('user', '👨‍👩‍👦 Group created: "' + name + '" by ' + currentUser, currentUser);
+    
+    const messages = load(KEYS.MESSAGES, []);
+    messages.push({
+      id: generateId(),
+      chatId: groupId,
+      from: 'System',
+      type: 'system',
+      text: '🎉 Group "' + name + '" create bhayo!',
+      time: getTime(),
+      read: true
+    });
+    save(KEYS.MESSAGES, messages);
+    
+    closeModal('createGroupModal');
+    renderGroups();
+    alert('Group "' + name + '" create bhayo! 🎉');
+  }
+  
+  function renderGroups() {
+    const groups = getMyGroups();
+    const messages = load(KEYS.MESSAGES, []);
+    const list = document.getElementById('groupsList');
+    
+    if (groups.length === 0) {
+      list.innerHTML = '<div class="empty-state"><div class="icon">👨‍👩‍👦</div>Koi group chaina.<br>➕ button le create garnus.</div>';
+      return;
+    }
+    
+    list.innerHTML = groups.map(g => {
+      const chatMsgs = messages.filter(m => m.chatId === g.id);
+      const lastMsg = chatMsgs[chatMsgs.length - 1];
+      const unread = chatMsgs.filter(m => m.from !== currentUser && !m.read && m.type !== 'system').length;
+      
+      return `
+        <div class="list-item ${activeChat && activeChat.id === g.id ? 'active' : ''}" 
+             onclick="openGroupChat('${escapeAttr(g.id)}', '${escapeAttr(g.name)}')">
+          <div class="group-avatar">👨‍👩‍👦</div>
+          <div class="item-info">
+            <h4>${escapeHtml(g.name)}</h4>
+            <p>${lastMsg ? escapeHtml(lastMsg.text).substring(0, 25) : g.members.length + ' members'}</p>
+          </div>
+          ${unread > 0 ? `<div class="item-badge">${unread}</div>` : ''}
+        </div>
+      `;
+    }).join('');
+  }
+  
+  function openGroupChat(groupId, groupName) {
+    const all = load(KEYS.GROUPS, {});
+    const group = all[groupId];
+    if (!group) return;
+    
+    activeChat = { 
+      type: 'group', 
+      id: groupId, 
+      name: groupName, 
+      members: group.members 
+    };
+    openChatView();
+    renderChat();
+    markChatRead(groupId);
+  }
+  
+  // ==================== CHAT ====================
+  function openChatView() {
+    document.getElementById('noChat').classList.add('hidden');
+    document.getElementById('chatView').classList.remove('hidden');
+    document.getElementById('chatName').textContent = activeChat.name;
+    
+    const box = document.getElementById('chatAvatarBox');
+    if (activeChat.type === 'room') {
+      box.innerHTML = '<div class="room-avatar">🏠</div>';
+    } else if (activeChat.type === 'group') {
+      box.innerHTML = '<div class="group-avatar">👨‍👩‍👦</div>';
+    } else {
+      box.innerHTML = avatarHtml(activeChat.friend, 'small');
+    }
+    
+    updateChatStatus();
+    
+    if (window.innerWidth <= 768) {
+      document.getElementById('sidebar').classList.add('hide');
+    }
+  }
+  
+  function updateChatStatus() {
+    const status = document.getElementById('chatStatus');
+    if (activeChat.type === 'friend') {
+      const online = isUserOnline(activeChat.friend);
+      status.textContent = online ? '● Online' : '● Offline';
+      status.className = online ? '' : 'offline';
+    } else if (activeChat.type === 'room') {
+      status.textContent = '● Public Room';
+      status.className = '';
+    } else {
+      status.textContent = '● ' + activeChat.members.length + ' members';
+      status.className = '';
+    }
+  }
+  
+  function renderChat() {
+    if (!activeChat) return;
+    
+    const messages = load(KEYS.MESSAGES, []);
+    const chatMsgs = messages.filter(m => m.chatId === activeChat.id);
+    const body = document.getElementById('chatBody');
+    
+    let html = '';
+    chatMsgs.forEach(m => {
+      const isMe = m.from === currentUser && m.type !== 'system';
+      
+      if (m.type === 'system') {
+        html += `
+          <div style="text-align:center; margin:12px 0;">
+            <span style="background:#e8f0ff; color:#667eea; padding:5px 12px; 
+                         border-radius:15px; font-size:11px;">${escapeHtml(m.text)}</span>
+          </div>
+        `;
+        return;
+      }
+      
+      const bubbleClass = isMe ? 'my-message' : 'other-message';
+      html += `
+        <div class="message-row ${isMe ? 'mine' : ''}">
+          ${!isMe ? avatarHtml(m.from, 'message') : ''}
+          <div class="message ${bubbleClass}">
+            ${!isMe ? `<span class="sender">${escapeHtml(m.from)}</span>` : ''}
+            ${escapeHtml(m.text)}
+            <span class="time">${m.time}</span>
+          </div>
+        </div>
+      `;
+    });
+    
+    body.innerHTML = html;
+    body.scrollTop = body.scrollHeight;
+    lastRenderCount = chatMsgs.length;
+  }
+  
+  function sendMessage() {
+    const input = document.getElementById('userInput');
+    const text = input.value.trim();
+    if (!text || !activeChat) return;
+    
+    const messages = load(KEYS.MESSAGES, []);
+    messages.push({
+      id: generateId(),
+      chatId: activeChat.id,
+      from: currentUser,
+      sessionId: sessionId,
+      type: 'user',
+      text: text,
+      time: getTime(),
+      read: false
+    });
+    save(KEYS.MESSAGES, messages);
+    
+    if (activeChat.type === 'friend') {
+      addLog('message', '💬 ' + currentUser + ' → ' + activeChat.friend + ': "' + text.substring(0, 30) + (text.length > 30 ? '...' : '') + '"', currentUser);
+    }
+    
+    input.value = '';
+    renderChat();
+  }
+  
+  function markChatRead(chatId) {
+    const messages = load(KEYS.MESSAGES, []);
+    let changed = false;
+    messages.forEach(m => {
+      if (m.chatId === chatId && m.from !== currentUser && !m.read) {
+        m.read = true;
+        changed = true;
+      }
+    });
+    if (changed) save(KEYS.MESSAGES, messages);
+    renderFriends();
+    renderRooms();
+    renderGroups();
+  }
+  
+  function clearCurrentChat() {
+    if (!activeChat) return;
+    if (!confirm('Yo chat clear garna chahanu hunchha?')) return;
+    
+    const messages = load(KEYS.MESSAGES, []);
+    const filtered = messages.filter(m => m.chatId !== activeChat.id);
+    save(KEYS.MESSAGES, filtered);
+    renderChat();
+  }
+  
+  function toggleSidebar() {
+    document.getElementById('sidebar').classList.toggle('hide');
+  }
+  
+  // ==================== PROFILE SETTINGS ====================
+  function openProfileSettings() {
+    tempProfilePhoto = '';
+    const photo = getUserPhoto(currentUser);
+    
+    if (photo) {
+      document.getElementById('profilePhotoImg').src = photo;
+      document.getElementById('profilePhotoImg').classList.remove('hidden');
+      document.getElementById('profilePhotoLetter').classList.add('hidden');
+    } else {
+      document.getElementById('profilePhotoImg').classList.add('hidden');
+      document.getElementById('profilePhotoLetter').classList.remove('hidden');
+      document.getElementById('profilePhotoLetter').textContent = currentUser.charAt(0).toUpperCase();
+    }
+    
+    document.getElementById('currentPassword').value = '';
+    document.getElementById('newPassword').value = '';
+    document.getElementById('confirmNewPassword').value = '';
+    
+    document.getElementById('profileModal').classList.remove('hidden');
+  }
+  
+  function handleProfilePhoto(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    if (file.size > 2 * 1024 * 1024) { alert('Photo 2MB bhanda thulo huna hunna!'); return; }
+    
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      compressImage(e.target.result, 200, (compressed) => {
+        tempProfilePhoto = compressed;
+        document.getElementById('profilePhotoImg').src = compressed;
+        document.getElementById('profilePhotoImg').classList.remove('hidden');
+        document.getElementById('profilePhotoLetter').classList.add('hidden');
+      });
+    };
+    reader.readAsDataURL(file);
+  }
+  
+  function saveProfilePhoto() {
+    if (!tempProfilePhoto) { alert('Pahile photo chhannus!'); return; }
+    
+    const users = load(KEYS.USERS, {});
+    users[currentUser].photo = tempProfilePhoto;
+    save(KEYS.USERS, users);
+    
+    document.getElementById('myAvatar').src = tempProfilePhoto;
+    document.getElementById('myAvatar').classList.remove('hidden');
+    document.getElementById('myAvatarLetter').classList.add('hidden');
+    
+    addLog('user', '📷 ' + currentUser + ' changed profile photo', currentUser);
+    
+    tempProfilePhoto = '';
+    alert('✅ Photo update bhayo!');
+    renderFriends();
+    renderGroups();
+  }
+  
+  function changePassword() {
+    const current = document.getElementById('currentPassword').value;
+    const newPass = document.getElementById('newPassword').value;
+    const confirm = document.getElementById('confirmNewPassword').value;
+    
+    if (!current) { alert('Current password lekhnus!'); return; }
+    if (!newPass || newPass.length < 4) { alert('Naya password minimum 4 characters!'); return; }
+    if (newPass !== confirm) { alert('Naya password milena!'); return; }
+    
+    const users = load(KEYS.USERS, {});
+    if (users[currentUser].password !== current) {
+      alert('❌ Current password milena!');
+      return;
+    }
+    
+    users[currentUser].password = newPass;
+    save(KEYS.USERS, users);
+    
+    addLog('user', '🔒 ' + currentUser + ' changed password', currentUser);
+    
+    document.getElementById('currentPassword').value = '';
+    document.getElementById('newPassword').value = '';
+    document.getElementById('confirmNewPassword').value = '';
+    
+    alert('✅ Password change bhayo!');
+  }
+  
+  // ==================== ADD FRIEND ====================
+  function openAddFriend() {
+    document.getElementById('friendSearchInput').value = '';
+    document.getElementById('searchResults').innerHTML = '';
+    document.getElementById('addFriendModal').classList.remove('hidden');
+    setTimeout(() => document.getElementById('friendSearchInput').focus(), 100);
+  }
+  
+  function searchUsers() {
+    const query = document.getElementById('friendSearchInput').value.trim().toLowerCase();
+    const results = document.getElementById('searchResults');
+    
+    if (!query) { results.innerHTML = ''; return; }
+    
+    const users = getAllUsers();
+    const myFriends = getMyFriends();
+    const matched = users.filter(u => u.toLowerCase().includes(query) && u !== currentUser);
+    
+    if (matched.length === 0) {
+      results.innerHTML = '<p style="text-align:center; color:#888; padding:15px; font-size:13px;">Koi user bhetiyena</p>';
+      return;
+    }
+    
+    results.innerHTML = matched.map(u => {
+      const isFriend = myFriends.includes(u);
+      const isOnline = isUserOnline(u);
+      return `
+        <div class="user-search-item">
+          ${avatarHtml(u, 'small')}
+          <div class="item-info">
+            <h4>${escapeHtml(u)}</h4>
+            <p>${isOnline ? '● Online' : 'Offline'}</p>
+          </div>
+          ${isFriend 
+            ? '<span style="color:#4ade80; font-size:12px; font-weight:600;">✓ Friend</span>' 
+            : `<button onclick="addFriend('${escapeAttr(u)}')" 
+                       style="width:auto; padding:6px 14px; font-size:12px; margin:0;">Add</button>`}
+        </div>
+      `;
+    }).join('');
+  }
+  
+  function openCreateRoom() {
+    document.getElementById('roomNameInput').value = '';
+    document.getElementById('createRoomModal').classList.remove('hidden');
+    setTimeout(() => document.getElementById('roomNameInput').focus(), 100);
+  }
+  
+  function closeModal(id) {
+    document.getElementById(id).classList.add('hidden');
+  }
+  
+  // ==================== ADMIN PANEL ====================
+  function switchAdminTab(tab) {
+    document.querySelectorAll('.admin-view .tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.admin-view .tab-content').forEach(c => c.classList.remove('active'));
+    
+    if (tab === 'users') {
+      document.getElementById('adminTabUsers').classList.add('active');
+      document.getElementById('adminContentUsers').classList.add('active');
+    } else if (tab === 'rooms') {
+      document.getElementById('adminTabRooms').classList.add('active');
+      document.getElementById('adminContentRooms').classList.add('active');
+    } else {
+      document.getElementById('adminTabLogs').classList.add('active');
+      document.getElementById('adminContentLogs').classList.add('active');
+      renderAdminLogs();
+    }
+  }
+  
+  function renderAdminUsers() {
+    const users = getAllUsers();
+    const actives = load(KEYS.ACTIVE, {});
+    const onlineSet = new Set(Object.values(actives).map(a => a.user));
+    const messages = load(KEYS.MESSAGES, []);
+    
+    document.getElementById('adminStats').textContent = 
+      users.length + ' users • ' + getRooms().length + ' rooms';
+    
+    const list = document.getElementById('adminUsersList');
+    
+    if (users.length === 0) {
+      list.innerHTML = '<div class="empty-state"><div class="icon">👥</div>Koi user chaina</div>';
+      return;
+    }
+    
+    users.sort((a, b) => {
+      const aOn = onlineSet.has(a), bOn = onlineSet.has(b);
+      if (aOn && !bOn) return -1;
+      if (!aOn && bOn) return 1;
+      return a.localeCompare(b);
+    });
+    
+    list.innerHTML = users.map(u => {
+      const isOnline = onlineSet.has(u);
+      const photo = getUserPhoto(u);
+      const userMsgs = messages.filter(m => m.from === u).length;
+      
+      const avatar = photo 
+        ? `<div class="avatar-wrapper ${isOnline ? 'online' : ''}"><img src="${photo}" class="avatar-small"></div>`
+        : `<div class="avatar-wrapper ${isOnline ? 'online' : ''}"><div class="avatar-small-letter">${u.charAt(0).toUpperCase()}</div></div>`;
+      
+      return `
+        <div class="list-item" onclick="adminViewUserChats('${escapeAttr(u)}')">
+          ${avatar}
+          <div class="item-info">
+            <h4>${escapeHtml(u)}</h4>
+            <p>${isOnline ? '● Online' : 'Offline'} • ${userMsgs} msgs</p>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+  
+  function renderAdminRooms() {
+    const rooms = getRooms();
+    const messages = load(KEYS.MESSAGES, []);
+    const list = document.getElementById('adminRoomsList');
+    
+    list.innerHTML = rooms.map(r => {
+      const chatId = 'room_' + r;
+      const count = messages.filter(m => m.chatId === chatId).length;
+      return `
+        <div class="list-item" onclick="adminOpenRoom('${escapeAttr(r)}', '${chatId}')">
+          <div class="room-avatar">🏠</div>
+          <div class="item-info">
+            <h4>#${escapeHtml(r)}</h4>
+            <p>${count} messages</p>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+  
+  function renderAdminLogs() {
+    const logs = getLogs();
+    const list = document.getElementById('adminLogsList');
+    
+    let filtered = logs;
+    if (currentLogFilter !== 'all') {
+      filtered = logs.filter(l => l.type === currentLogFilter);
+    }
+    
+    filtered = [...filtered].reverse();
+    
+    if (filtered.length === 0) {
+      list.innerHTML = '<div class="empty-state"><div class="icon">📊</div>Koi activity chaina</div>';
+      return;
+    }
+    
+    list.innerHTML = filtered.slice(0, 100).map(l => `
+      <div class="log-item">
+        <div class="log-icon ${l.type}">${getLogIcon(l.type)}</div>
+        <div class="log-content">
+          <p>${escapeHtml(l.message)}</p>
+          <span class="time">${formatTime(l.timestamp)} • ${escapeHtml(l.user)}</span>
+        </div>
+      </div>
+    `).join('');
+  }
+  
+  function filterLogs(type) {
+    currentLogFilter = type;
+    document.querySelectorAll('.log-filter').forEach(f => f.classList.remove('active'));
+    document.querySelector(`.log-filter[data-filter="${type}"]`).classList.add('active');
+    renderAdminLogs();
+  }
+  
+  function adminOpenRoom(room, chatId) {
+    adminActiveChat = { type: 'room', id: chatId, name: '#' + room };
+    document.getElementById('adminNoChat').classList.add('hidden');
+    document.getElementById('adminChatView').classList.remove('hidden');
+    document.getElementById('adminChatName').textContent = '#' + room;
+    document.getElementById('adminChatAvatarBox').innerHTML = '<div class="room-avatar">🏠</div>';
+    document.getElementById('adminChatStatus').textContent = '● Room';
+    renderAdminChat();
+  }
+  
+  function adminViewUserChats(user) {
+    const messages = load(KEYS.MESSAGES, []);
+    const relevantChats = new Set();
+    
+    messages.forEach(m => {
+      if (m.chatId && m.chatId.includes('private') && m.chatId.includes(user)) {
+        relevantChats.add(m.chatId);
+      }
+    });
+    
+    if (relevantChats.size === 0) {
+      alert(user + ' ko koi private chat chaina.');
+      return;
+    }
+    
+    adminActiveChat = { 
+      type: 'private', 
+      id: Array.from(relevantChats)[0], 
+      name: user,
+      allChats: Array.from(relevantChats)
+    };
+    
+    document.getElementById('adminNoChat').classList.add('hidden');
+    document.getElementById('adminChatView').classList.remove('hidden');
+    document.getElementById('adminChatName').textContent = user + ' (Private)';
+    document.getElementById('adminChatAvatarBox').innerHTML = avatarHtml(user, 'small');
+    document.getElementById('adminChatStatus').textContent = '🔒 Private Chat';
+    renderAdminChat();
+  }
+  
+  function renderAdminChat() {
+    if (!adminActiveChat) return;
+    
+    const messages = load(KEYS.MESSAGES, []);
+    let chatMsgs;
+    
+    if (adminActiveChat.type === 'private' && adminActiveChat.allChats) {
+      chatMsgs = messages.filter(m => adminActiveChat.allChats.includes(m.chatId));
+    } else {
+      chatMsgs = messages.filter(m => m.chatId === adminActiveChat.id);
+    }
+    
+    const body = document.getElementById('adminChatBody');
+    let html = '';
+    
+    chatMsgs.forEach(m => {
+      if (m.type === 'system') {
+        html += `
+          <div style="text-align:center; margin:12px 0;">
+            <span style="background:#e8f0ff; color:#667eea; padding:5px 12px; 
+                         border-radius:15px; font-size:11px;">${escapeHtml(m.text)}</span>
+          </div>
+        `;
+        return;
+      }
+      
+      const isAdminMsg = m.from === 'Admin';
+      html += `
+        <div class="message-row ${isAdminMsg ? 'mine' : ''}">
+          ${!isAdminMsg ? avatarHtml(m.from, 'message') : ''}
+          <div class="message ${isAdminMsg ? 'my-message' : 'other-message'}">
+            ${!isAdminMsg ? `<span class="sender">${escapeHtml(m.from)}</span>` : ''}
+            ${escapeHtml(m.text)}
+            <span class="time">${m.time}</span>
+          </div>
+        </div>
+      `;
+    });
+    
+    if (chatMsgs.length === 0) html = '<div class="empty-state">Koi message chaina</div>';
+    
+    body.innerHTML = html;
+    body.scrollTop = body.scrollHeight;
+  }
+  
+  function adminSendReply() {
+    if (!adminActiveChat) return;
+    const input = document.getElementById('adminInput');
+    const text = input.value.trim();
+    if (!text) return;
+    
+    const messages = load(KEYS.MESSAGES, []);
+    messages.push({
+      id: generateId(),
+      chatId: adminActiveChat.id,
+      from: 'Admin',
+      type: 'admin',
+      text: text,
+      time: getTime(),
+      read: false
+    });
+    save(KEYS.MESSAGES, messages);
+    
+    addLog('message', '👨‍💼 Admin replied in ' + adminActiveChat.name, 'admin');
+    
+    input.value = '';
+    renderAdminChat();
+  }
+  
+  function adminClearChat() {
+    if (!adminActiveChat) return;
+    if (!confirm('Yo chat clear garna chahanu hunchha?')) return;
+    
+    const messages = load(KEYS.MESSAGES, []);
+    const filtered = messages.filter(m => m.chatId !== adminActiveChat.id);
+    save(KEYS.MESSAGES, filtered);
+    
+    addLog('delete', '🗑️ Admin cleared chat: ' + adminActiveChat.name, 'admin');
+    
+    adminActiveChat = null;
+    document.getElementById('adminChatView').classList.add('hidden');
+    document.getElementById('adminNoChat').classList.remove('hidden');
+  }
+  
+  // ==================== LIVE SYNC ====================
+  function syncData() {
+    if (isAdmin) {
+      if (sessionStorage.getItem(ADMIN_SESSION_KEY) === 'logged_in') {
+        renderAdminUsers();
+        renderAdminRooms();
+        if (adminActiveChat) renderAdminChat();
+        if (document.getElementById('adminTabLogs').classList.contains('active')) {
+          renderAdminLogs();
+        }
+      }
+    } else if (currentUser) {
+      renderFriends();
+      renderRooms();
+      renderGroups();
+      
+      if (activeChat) {
+        const messages = load(KEYS.MESSAGES, []);
+        const chatMsgs = messages.filter(m => m.chatId === activeChat.id);
+        if (chatMsgs.length !== lastRenderCount) {
+          renderChat();
+          markChatRead(activeChat.id);
+        }
+        updateChatStatus();
+      }
+    }
+  }
+  
+  // ==================== HELPERS ====================
+  function getTime() {
+    return new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+  }
+  
+  function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+  }
+  
+  function escapeAttr(text) {
+    return text.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+  }
+  
+  // ==================== EVENTS ====================
+  document.getElementById('userInput').addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') sendMessage();
+  });
+  
+  document.getElementById('adminInput').addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') adminSendReply();
+  });
+  
+  document.getElementById('loginPassword').addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') doLogin();
+  });
+  
+  document.getElementById('regConfirm').addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') doRegister();
+  });
+  
+  document.getElementById('roomNameInput').addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') createRoom();
+  });
+  
+  document.getElementById('groupNameInput').addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') createGroup();
+  });
+  
+  ['addFriendModal', 'createRoomModal', 'createGroupModal', 'profileModal'].forEach(id => {
+    document.getElementById(id).addEventListener('click', (e) => {
+      if (e.target.id === id) closeModal(id);
+    });
+  });
+  
+  window.addEventListener('beforeunload', () => {
+    if (!isAdmin && sessionId) {
+      const actives = load(KEYS.ACTIVE, {});
+      delete actives[sessionId];
+      save(KEYS.ACTIVE, actives);
+    }
+  });
+</script>
+
+</body>
+</html>
